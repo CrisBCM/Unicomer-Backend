@@ -9,5 +9,6 @@ import java.util.Optional;
 @Repository
 public interface ClientRepository extends JpaRepository<Client, String> {
     Optional<Client> findByDni(String dni);
+    public boolean existsByDni(String dni);
 
 }

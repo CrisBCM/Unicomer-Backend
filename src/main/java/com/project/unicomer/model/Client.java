@@ -28,6 +28,7 @@ public class Client implements UserDetails {
     private String email;
     private String password;
 
+
     @OneToMany(mappedBy = "client", fetch = FetchType.EAGER)
     private Set<Card> cards = new HashSet<>();
 

@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,7 +24,7 @@ public class Card {
 
     private String cardHolder;
     private String number;
-    private LocalDate thruDate;
+    private LocalDateTime thruDate;
     private BigDecimal balance;
 
     @ManyToOne(fetch = FetchType.EAGER)

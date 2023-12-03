@@ -9,4 +9,5 @@ public interface AuthenticationService {
     public AuthenticationResponse register(RegisterRequest registerRequest);
 
     public boolean existsByDni(String dni);
+    public boolean existsByEmail(String email);
 }

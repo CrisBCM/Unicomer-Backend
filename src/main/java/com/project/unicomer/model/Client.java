@@ -17,7 +17,10 @@ public class Client implements UserDetails {
     @Id
     @Getter
     private String dni;
-
+    @Getter
+    private String documentType;
+    @Getter
+    private String urlImg;
     @Getter
     private String fullName;
     @Getter

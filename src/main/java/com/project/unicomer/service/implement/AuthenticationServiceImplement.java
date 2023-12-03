@@ -70,6 +70,7 @@ public class AuthenticationServiceImplement implements AuthenticationService {
         Client newClient = Client.builder()
                 .dni(registerRequest.getDni())
                 .email(registerRequest.getEmail())
+                .urlImg("../../../assets/images/user-icon.png")
                 .fullName(fullname)
                 .cards(new HashSet<>())
                 .password(passwordEncoder.encode(registerRequest.getPassword()))
@@ -96,5 +97,10 @@ public class AuthenticationServiceImplement implements AuthenticationService {
     @Override
     public boolean existsByDni(String dni) {
         return clientRepository.existsByDni(dni);
+    }
+
+    @Override
+    public boolean existsByEmail(String email) {
+        return clientRepository.existsByEmail(email);
     }
 }

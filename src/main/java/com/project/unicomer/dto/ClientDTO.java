@@ -11,9 +11,11 @@ import java.util.stream.Collectors;
 @Setter
 public class ClientDTO {
     private String fullname;
+    private String urlImg;
     private Set<CardDTO> cards;
     public ClientDTO(Client client){
         this.fullname = client.getFullName();
+        this.urlImg = client.getUrlImg();
         this.cards = client.getCards()
                 .stream()
                 .map(CardDTO::new)

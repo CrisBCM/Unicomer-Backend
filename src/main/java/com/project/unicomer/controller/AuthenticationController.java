@@ -21,13 +21,16 @@ public class AuthenticationController {
     public ResponseEntity<Object> register(@RequestBody RegisterRequest registerRequest){
         if(authenticationService.existsByDni(registerRequest.getDni()))
             return new ResponseEntity<>("El DNI ya se encuentra registrado", HttpStatus.BAD_REQUEST);
+        if(authenticationService.existsByEmail(registerRequest.getEmail()))
+            return new ResponseEntity<>("El Email ya se encuentra registrado", HttpStatus.BAD_REQUEST);
+
 
         return ResponseEntity.ok(authenticationService.register(registerRequest));
     }
     @PostMapping("/login")
     public ResponseEntity<Object> login(@RequestBody AuthenticationRequest authenticationRequest){
         if(!authenticationService.existsByDni(authenticationRequest.getDni()))
-            return new ResponseEntity<>("EL DNI NO se encuentra registrado", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("El DNI NO se encuentra registrado", HttpStatus.BAD_REQUEST);
 
         return ResponseEntity.ok(authenticationService.authenticate(authenticationRequest));
     }

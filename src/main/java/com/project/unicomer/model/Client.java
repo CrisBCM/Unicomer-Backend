@@ -1,13 +1,7 @@
 package com.project.unicomer.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.*;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -15,27 +9,46 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-@Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
 public class Client implements UserDetails {
     @Id
+    @Getter
     private String dni;
 
+    @Getter
     private String fullName;
+    @Getter
     private String email;
     private String password;
 
-
-    @OneToMany(mappedBy = "client", fetch = FetchType.EAGER)
+    @Getter
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "client", cascade = CascadeType.ALL)
     private Set<Card> cards = new HashSet<>();
 
     public void addCard(Card card){
         this.cards.add(card);
         card.setClient(this);
     }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setCards(Set<Card> cards) {
+        this.cards = cards;
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return null;
@@ -71,4 +84,5 @@ public class Client implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
+
 }

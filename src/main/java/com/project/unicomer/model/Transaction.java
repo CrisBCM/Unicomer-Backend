@@ -20,7 +20,7 @@ public class Transaction {
     private LocalDateTime date;
     private TransactionType transactionType;
     private BigDecimal amount;
-
+    private String toClientName;
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Card card;
 }

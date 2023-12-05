@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 public class CardDTO {
     private String number;
     private String cardHolder;
-    private LocalDateTime thruDate;
+    private String thruDate;
     private BigDecimal balance;
 
     public CardDTO(Card card){

@@ -58,14 +58,16 @@ public class AuthenticationServiceImplement implements AuthenticationService {
 
         String fullname = registerRequest.getName() + " " + registerRequest.getLastname();
 
+        LocalDate date = LocalDate.now().plusYears(5);
+
+        String thruDate  = date.getMonthValue() + "/" + date.getYear();
+
         Card newCard = Card.builder()
                 .number(cardService.getRandomNumberCard())
                 .cardHolder(fullname)
                 .balance(BigDecimal.ZERO)
-                .thruDate(LocalDateTime.now().plusYears(5))
+                .thruDate(thruDate)
                 .build();
-
-        System.out.println("CARD: " + newCard);
 
         Client newClient = Client.builder()
                 .dni(registerRequest.getDni())

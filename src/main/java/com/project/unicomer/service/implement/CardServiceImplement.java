@@ -1,5 +1,6 @@
 package com.project.unicomer.service.implement;
 
+import com.project.unicomer.model.Card;
 import com.project.unicomer.repository.CardRepository;
 import com.project.unicomer.service.CardService;
 import com.project.unicomer.util.CardUtils;
@@ -20,5 +21,15 @@ public class CardServiceImplement implements CardService {
         }while(cardRepository.existsByNumber(cardNumber));
 
         return cardNumber;
+    }
+
+    @Override
+    public boolean existsByNumber(String number) {
+        return cardRepository.existsByNumber(number);
+    }
+
+    @Override
+    public Card findByNumber(String number) {
+        return cardRepository.findByNumber(number);
     }
 }

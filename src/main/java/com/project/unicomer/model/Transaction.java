@@ -1,26 +1,26 @@
 package com.project.unicomer.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.*;
+import lombok.*;
 
-@Data
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
 @Entity
 public class Transaction {
     @Id
+    @GeneratedValue
     private Long id;
 
+    private LocalDateTime date;
     private TransactionType transactionType;
-    private int amount;
+    private BigDecimal amount;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Card card;
 }

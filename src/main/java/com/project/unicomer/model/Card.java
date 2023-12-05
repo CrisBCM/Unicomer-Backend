@@ -18,20 +18,24 @@ public class Card {
     private String number;
 
     private String cardHolder;
-    private LocalDateTime thruDate;
+    private String thruDate;
     private BigDecimal balance;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Client client;
 
-    @OneToMany(mappedBy = "card")
+    @OneToMany(mappedBy = "card", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Transaction> transactions = new ArrayList<>();
 
+    public void addTransaction(Transaction transaction){
+        this.transactions.add(transaction);
+        transaction.setCard(this);
+    }
     public void setCardHolder(String cardHolder) {
         this.cardHolder = cardHolder;
     }
 
-    public void setThruDate(LocalDateTime thruDate) {
+    public void setThruDate(String thruDate) {
         this.thruDate = thruDate;
     }
 

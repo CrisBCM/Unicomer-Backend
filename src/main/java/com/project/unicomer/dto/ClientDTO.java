@@ -12,10 +12,12 @@ import java.util.stream.Collectors;
 public class ClientDTO {
     private String fullname;
     private String urlImg;
+    private String email;
     private Set<CardDTO> cards;
     public ClientDTO(Client client){
         this.fullname = client.getFullName();
         this.urlImg = client.getUrlImg();
+        this.email = client.getEmail();
         this.cards = client.getCards()
                 .stream()
                 .map(CardDTO::new)

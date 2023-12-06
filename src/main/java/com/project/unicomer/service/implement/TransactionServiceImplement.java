@@ -47,7 +47,7 @@ public class TransactionServiceImplement implements TransactionService {
         if(!cardService.existsByNumber(fromCardNumber)) return new ResponseEntity<>("El numero de tarjeta no existe!", HttpStatus.FORBIDDEN);
         if(fromCard.getBalance().compareTo(amount) < 0) return new ResponseEntity<>("Monto insuficiente!", HttpStatus.FORBIDDEN);
 
-        Transaction transaction = Transaction.builder()
+        Transaction debit = Transaction.builder()
                 .transactionType(TransactionType.TRANSACCION)
                 .fromClientName(fromCard.getCardHolder())
                 .date(LocalDateTime.now(Const.ZONA_HORARIA_ARGENTINA))
@@ -55,8 +55,16 @@ public class TransactionServiceImplement implements TransactionService {
                 .toClientName(toCard.getCardHolder())
                 .build();
 
-        fromCard.addTransaction(transaction);
-        toCard.addTransaction(transaction);
+        Transaction credit = Transaction.builder()
+                .transactionType(TransactionType.TRANSACCION)
+                .fromClientName(fromCard.getCardHolder())
+                .date(LocalDateTime.now(Const.ZONA_HORARIA_ARGENTINA))
+                .amount(amount)
+                .toClientName(toCard.getCardHolder())
+                .build();
+
+        fromCard.addTransaction(debit);
+        toCard.addTransaction(credit);
 
         fromCard.setBalance(fromCard.getBalance().subtract(amount));
         toCard.setBalance(toCard.getBalance().add(amount));
@@ -64,7 +72,7 @@ public class TransactionServiceImplement implements TransactionService {
         cardRepository.save(fromCard);
         cardRepository.save(toCard);
 
-        return new ResponseEntity<>(new TransactionDTO(transaction),HttpStatus.CREATED);
+        return new ResponseEntity<>(new TransactionDTO(debit),HttpStatus.CREATED);
     }
 
     @Override

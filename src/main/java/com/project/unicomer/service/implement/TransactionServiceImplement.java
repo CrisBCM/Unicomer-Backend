@@ -61,14 +61,10 @@ public class TransactionServiceImplement implements TransactionService {
         fromCard.setBalance(fromCard.getBalance().subtract(amount));
         toCard.setBalance(toCard.getBalance().add(amount));
 
-
-
         cardRepository.save(fromCard);
         cardRepository.save(toCard);
 
-        TransactionDTO savedTransaction = new TransactionDTO(transactionRepository.save(transaction));
-
-        return new ResponseEntity<>(savedTransaction,HttpStatus.CREATED);
+        return new ResponseEntity<>(transaction,HttpStatus.CREATED);
     }
 
     @Override

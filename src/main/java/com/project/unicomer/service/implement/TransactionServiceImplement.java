@@ -64,7 +64,7 @@ public class TransactionServiceImplement implements TransactionService {
         cardRepository.save(fromCard);
         cardRepository.save(toCard);
 
-        return new ResponseEntity<>(transaction,HttpStatus.CREATED);
+        return new ResponseEntity<>(new TransactionDTO(transaction),HttpStatus.CREATED);
     }
 
     @Override

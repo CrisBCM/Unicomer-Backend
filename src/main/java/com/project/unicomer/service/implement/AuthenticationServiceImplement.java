@@ -1,5 +1,6 @@
 package com.project.unicomer.service.implement;
 
+import com.project.unicomer.Const;
 import com.project.unicomer.config.JwtService;
 import com.project.unicomer.model.*;
 import com.project.unicomer.repository.ClientRepository;
@@ -58,7 +59,7 @@ public class AuthenticationServiceImplement implements AuthenticationService {
 
         String fullname = registerRequest.getName() + " " + registerRequest.getLastname();
 
-        LocalDate date = LocalDate.now().plusYears(5);
+        LocalDate date = LocalDate.now(Const.ZONA_HORARIA_ARGENTINA).plusYears(5);
 
         String thruDate  = date.getMonthValue() + "/" + date.getYear();
 

@@ -1,5 +1,6 @@
 package com.project.unicomer.service.implement;
 
+import com.project.unicomer.Const;
 import com.project.unicomer.dto.EgressDTO;
 import com.project.unicomer.dto.IncomeDTO;
 import com.project.unicomer.dto.TransactionDTO;
@@ -49,7 +50,7 @@ public class TransactionServiceImplement implements TransactionService {
         Transaction transaction = Transaction.builder()
                 .transactionType(TransactionType.TRANSACCION)
                 .fromClientName(fromCard.getCardHolder())
-                .date(LocalDateTime.now())
+                .date(LocalDateTime.now(Const.ZONA_HORARIA_ARGENTINA))
                 .amount(amount)
                 .toClientName(toCard.getCardHolder())
                 .build();
@@ -60,10 +61,12 @@ public class TransactionServiceImplement implements TransactionService {
         fromCard.setBalance(fromCard.getBalance().subtract(amount));
         toCard.setBalance(toCard.getBalance().add(amount));
 
-        TransactionDTO savedTransaction = new TransactionDTO(transactionRepository.save(transaction));
+
 
         cardRepository.save(fromCard);
         cardRepository.save(toCard);
+
+        TransactionDTO savedTransaction = new TransactionDTO(transactionRepository.save(transaction));
 
         return new ResponseEntity<>(savedTransaction,HttpStatus.CREATED);
     }
@@ -80,7 +83,7 @@ public class TransactionServiceImplement implements TransactionService {
 
         Transaction deposit = Transaction.builder()
                 .transactionType(TransactionType.DEPOSITO)
-                .date(LocalDateTime.now())
+                .date(LocalDateTime.now(Const.ZONA_HORARIA_ARGENTINA))
                 .amount(amount)
                 .build();
 
@@ -106,7 +109,7 @@ public class TransactionServiceImplement implements TransactionService {
 
         Transaction withdrawal = Transaction.builder()
                 .transactionType(TransactionType.EXTRACCION)
-                .date(LocalDateTime.now())
+                .date(LocalDateTime.now(Const.ZONA_HORARIA_ARGENTINA))
                 .amount(amount)
                 .build();
 
@@ -136,7 +139,7 @@ public class TransactionServiceImplement implements TransactionService {
     @Override
     public BigDecimal calculateMonthlyIncomeEgress(List<Transaction> transactions) {
         BigDecimal incomeEgress = new BigDecimal(0);
-        LocalDate currentMonth = LocalDate.now();
+        LocalDate currentMonth = LocalDate.now(Const.ZONA_HORARIA_ARGENTINA);
 
         for (Transaction transaction : transactions) {
             if(transaction.getDate().getMonth() == currentMonth.getMonth() && transaction.getDate().getYear() == currentMonth.getYear()){

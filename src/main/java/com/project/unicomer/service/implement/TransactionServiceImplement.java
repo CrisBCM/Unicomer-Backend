@@ -1,19 +1,24 @@
 package com.project.unicomer.service.implement;
 
+import com.project.unicomer.dto.EgressDTO;
+import com.project.unicomer.dto.IncomeDTO;
 import com.project.unicomer.dto.TransactionDTO;
-import com.project.unicomer.model.Card;
-import com.project.unicomer.model.Transaction;
-import com.project.unicomer.model.TransactionType;
-import com.project.unicomer.model.TransactionTypeInfo;
+import com.project.unicomer.model.*;
 import com.project.unicomer.repository.CardRepository;
+import com.project.unicomer.repository.ClientRepository;
+import com.project.unicomer.repository.TransactionRepository;
 import com.project.unicomer.service.CardService;
 import com.project.unicomer.service.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cglib.core.Local;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -25,6 +30,10 @@ public class TransactionServiceImplement implements TransactionService {
     private CardService cardService;
     @Autowired
     private CardRepository cardRepository;
+    @Autowired
+    private TransactionRepository transactionRepository;
+    @Autowired
+    private ClientRepository clientRepository;
     @Override
     public ResponseEntity<Object> transfer(String fromCardNumber, String toCardNumber, BigDecimal amount) {
 
@@ -37,32 +46,26 @@ public class TransactionServiceImplement implements TransactionService {
         if(!cardService.existsByNumber(fromCardNumber)) return new ResponseEntity<>("El numero de tarjeta no existe!", HttpStatus.FORBIDDEN);
         if(fromCard.getBalance().compareTo(amount) < 0) return new ResponseEntity<>("Monto insuficiente!", HttpStatus.FORBIDDEN);
 
-        Transaction debitTransaction = Transaction.builder()
+        Transaction transaction = Transaction.builder()
                 .transactionType(TransactionType.TRANSACCION)
+                .fromClientName(fromCard.getCardHolder())
                 .date(LocalDateTime.now())
                 .amount(amount)
                 .toClientName(toCard.getCardHolder())
                 .build();
 
-        fromCard.addTransaction(debitTransaction);
-
-        Transaction creditTransaction = Transaction.builder()
-                .transactionType(TransactionType.TRANSACCION)
-                .date(LocalDateTime.now())
-                .amount(amount)
-                .card(toCard)
-                .toClientName(toCard.getCardHolder())
-                .build();
-
-        toCard.addTransaction(creditTransaction);
+        fromCard.addTransaction(transaction);
+        toCard.addTransaction(transaction);
 
         fromCard.setBalance(fromCard.getBalance().subtract(amount));
         toCard.setBalance(toCard.getBalance().add(amount));
 
+        TransactionDTO savedTransaction = new TransactionDTO(transactionRepository.save(transaction));
+
         cardRepository.save(fromCard);
         cardRepository.save(toCard);
 
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        return new ResponseEntity<>(savedTransaction,HttpStatus.CREATED);
     }
 
     @Override
@@ -82,12 +85,12 @@ public class TransactionServiceImplement implements TransactionService {
                 .build();
 
         toCard.setBalance(toCard.getBalance().add(amount));
-
         toCard.addTransaction(deposit);
 
+        TransactionDTO savedTransaction = new TransactionDTO(transactionRepository.save(deposit));
         cardRepository.save(toCard);
 
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        return new ResponseEntity<>(savedTransaction, HttpStatus.CREATED);
     }
 
     @Override
@@ -109,10 +112,10 @@ public class TransactionServiceImplement implements TransactionService {
 
         fromCard.setBalance(fromCard.getBalance().subtract(amount));
         fromCard.addTransaction(withdrawal);
-
+        TransactionDTO savedTransaction = new TransactionDTO(transactionRepository.save(withdrawal));
         cardRepository.save(fromCard);
 
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        return new ResponseEntity<>(savedTransaction, HttpStatus.CREATED);
     }
 
     @Override
@@ -129,4 +132,61 @@ public class TransactionServiceImplement implements TransactionService {
                 .map(TransactionDTO::new)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public BigDecimal calculateMonthlyIncomeEgress(List<Transaction> transactions) {
+        BigDecimal incomeEgress = new BigDecimal(0);
+        LocalDate currentMonth = LocalDate.now();
+
+        for (Transaction transaction : transactions) {
+            if(transaction.getDate().getMonth() == currentMonth.getMonth() && transaction.getDate().getYear() == currentMonth.getYear()){
+                incomeEgress = incomeEgress.add(transaction.getAmount());
+            }
+
+        }
+        return incomeEgress;
+    }
+
+    @Override
+    public boolean isTransactionAddition(String currentClient, String toClientName) {
+
+        return currentClient.equals(toClientName);
+    }
+
+
+    @Override
+    public IncomeDTO getMonthlyIncome(Authentication authentication) {
+
+        Client currentClient = clientRepository.findByDni(authentication.getName()).orElse(null);
+        String clientName = currentClient.getFullName();
+
+        List<Transaction> transactions = currentClient.getCards().stream().findFirst().orElse(null).getTransactions();
+
+        List<Transaction> transactionsIncome = transactions.stream().filter( transaction -> transaction.getTransactionType() == TransactionType.DEPOSITO || transaction.getTransactionType() == TransactionType.TRANSACCION
+                && isTransactionAddition(clientName, transaction.getToClientName())).toList();
+
+        BigDecimal monthlyIncome = calculateMonthlyIncomeEgress(transactionsIncome);
+
+        return IncomeDTO.builder()
+                .monthlyIncome(monthlyIncome)
+                .name("Ingreso")
+                .build();
+    }
+
+    @Override
+    public EgressDTO getMonthlyEgress(Authentication authentication) {
+        Client currentClient = clientRepository.findByDni(authentication.getName()).orElse(null);
+        String clientName = currentClient.getFullName();
+        List<Transaction> transactions = currentClient.getCards().stream().findFirst().orElse(null).getTransactions();
+        List<Transaction> transactionsEgress = transactions.stream().filter( transaction -> transaction.getTransactionType() == TransactionType.EXTRACCION || transaction.getTransactionType() == TransactionType.TRANSACCION
+                && !(isTransactionAddition(clientName, transaction.getToClientName()))).toList();
+
+        BigDecimal monthlyEgress = calculateMonthlyIncomeEgress(transactionsEgress);
+
+        return EgressDTO.builder()
+                .monthlyEgress(monthlyEgress)
+                .name("Egreso")
+                .build();
+    }
+
 }

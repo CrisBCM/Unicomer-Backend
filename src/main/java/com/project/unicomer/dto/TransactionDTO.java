@@ -14,13 +14,15 @@ public class TransactionDTO {
     private String ownerName;
     private BigDecimal amount;
     private LocalDateTime date;
+    private String fromClientName;
     private String toClientName;
     private String transactionType;
     public TransactionDTO (Transaction transaction){
         ownerName = transaction.getCard().getCardHolder();
         amount = transaction.getAmount();
         date = transaction.getDate();
+        fromClientName = transaction.getFromClientName();
         toClientName = transaction.getToClientName();
-        transactionType = transaction.getTransactionType().name();
+        transactionType = transaction.getTransactionType().getName();
     }
 }
